@@ -153,18 +153,15 @@ class ConvNetLayer(GraphModuleMixin, torch.nn.Module):
             AtomicDataDict.NODE_FEATURES_KEY
         ] = self.equivariant_nonlin.irreps_out
 
-    def forward(self, data: AtomicDataDict.Type) -> AtomicDataDict.Type:
+    def forward(self, x, h, edge_length_embeddings, edge_sh, edge_index):
         # save old features for resnet
-        old_x = data[AtomicDataDict.NODE_FEATURES_KEY]
+        old_h = h
         # run convolution
-        data = self.conv(data)
+        h = self.conv(x, h, edge_length_embeddings, edge_sh, edge_index)
         # do nonlinearity
-        data[AtomicDataDict.NODE_FEATURES_KEY] = self.equivariant_nonlin(
-            data[AtomicDataDict.NODE_FEATURES_KEY]
-        )
+        h = self.equivariant_nonlin(h)
+
         # do resnet
         if self.resnet:
-            data[AtomicDataDict.NODE_FEATURES_KEY] = (
-                old_x + data[AtomicDataDict.NODE_FEATURES_KEY]
-            )
-        return data
+            h = old_h + h
+        return h

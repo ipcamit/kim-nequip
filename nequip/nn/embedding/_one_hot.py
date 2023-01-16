@@ -36,12 +36,6 @@ class OneHotAtomEncoding(GraphModuleMixin, torch.nn.Module):
             ]
         self._init_irreps(irreps_in=irreps_in, irreps_out=irreps_out)
 
-    def forward(self, data: AtomicDataDict.Type) -> AtomicDataDict.Type:
-        type_numbers = data[AtomicDataDict.ATOM_TYPE_KEY].squeeze(-1)
-        one_hot = torch.nn.functional.one_hot(
-            type_numbers, num_classes=self.num_types
-        ).to(device=type_numbers.device, dtype=data[AtomicDataDict.POSITIONS_KEY].dtype)
-        data[AtomicDataDict.NODE_ATTRS_KEY] = one_hot
-        if self.set_features:
-            data[AtomicDataDict.NODE_FEATURES_KEY] = one_hot
-        return data
+    def forward(self, x):
+        one_hot = torch.nn.functional.one_hot(x, num_classes=self.num_types)
+        return one_hot

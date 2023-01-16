@@ -54,6 +54,7 @@ def model_from_config(
         config["type_names"] = type_mapper.type_names
 
     # Build
+    # print(f"Model Builder Config: {config} {config.get('model_builders')}")
     builders = [
         load_callable(b, prefix="nequip.model")
         for b in config.get("model_builders", [])
@@ -62,7 +63,9 @@ def model_from_config(
     model = None
 
     for builder in builders:
+        print(f"Building model with {builder}")
         pnames = inspect.signature(builder).parameters
+        # print(f"Builder {builder} has parameters {pnames}")
         params = {}
         if "initialize" in pnames:
             params["initialize"] = initialize
@@ -98,5 +101,6 @@ def model_from_config(
             raise TypeError(
                 f"Builder {builder.__name__} didn't return a GraphModuleMixin, got {type(model)} instead"
             )
-
+    print("exiting")
+    # exit()
     return model

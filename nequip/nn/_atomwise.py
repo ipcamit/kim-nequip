@@ -52,9 +52,9 @@ class AtomwiseLinear(GraphModuleMixin, torch.nn.Module):
             irreps_in=self.irreps_in[field], irreps_out=self.irreps_out[out_field]
         )
 
-    def forward(self, data: AtomicDataDict.Type) -> AtomicDataDict.Type:
-        data[self.out_field] = self.linear(data[self.field])
-        return data
+    def forward(self, h):
+        h = self.linear(h)
+        return h
 
 
 class AtomwiseReduce(GraphModuleMixin, torch.nn.Module):
@@ -85,14 +85,11 @@ class AtomwiseReduce(GraphModuleMixin, torch.nn.Module):
             else {},
         )
 
-    def forward(self, data: AtomicDataDict.Type) -> AtomicDataDict.Type:
-        data = AtomicDataDict.with_batch(data)
-        data[self.out_field] = scatter(
-            data[self.field], data[AtomicDataDict.BATCH_KEY], dim=0, reduce=self.reduce
-        )
+    def forward(self, h, contrib):
+        E = scatter(h, contrib, dim=0, reduce=self.reduce)
         if self.constant != 1.0:
-            data[self.out_field] = data[self.out_field] * self.constant
-        return data
+            E = E * self.constant
+        return E
 
 
 class PerSpeciesScaleShift(GraphModuleMixin, torch.nn.Module):
@@ -170,22 +167,17 @@ class PerSpeciesScaleShift(GraphModuleMixin, torch.nn.Module):
 
         self.arguments_in_dataset_units = arguments_in_dataset_units
 
-    def forward(self, data: AtomicDataDict.Type) -> AtomicDataDict.Type:
+    def forward(self, x, h):
 
         if not (self.has_scales or self.has_shifts):
-            return data
+            return h
 
-        species_idx = data[AtomicDataDict.ATOM_TYPE_KEY]
-        in_field = data[self.field]
-        assert len(in_field) == len(
-            species_idx
-        ), "in_field doesnt seem to have correct per-atom shape"
+        assert len(h) == len(x), "h doesnt seem to have correct per-atom shape"
         if self.has_scales:
-            in_field = self.scales[species_idx].view(-1, 1) * in_field
+            h = self.scales[x].view(-1, 1) * h
         if self.has_shifts:
-            in_field = self.shifts[species_idx].view(-1, 1) + in_field
-        data[self.out_field] = in_field
-        return data
+            h = self.shifts[x].view(-1, 1) + h
+        return h
 
     def update_for_rescale(self, rescale_module):
         if hasattr(rescale_module, "related_scale_keys"):

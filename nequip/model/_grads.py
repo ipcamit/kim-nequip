@@ -13,6 +13,7 @@ def ForceOutput(model: GraphModuleMixin) -> GradientOutput:
     Returns:
         A ``GradientOutput`` wrapping ``model``.
     """
+    print("ForceOutput--------------------------")
     if AtomicDataDict.FORCE_KEY in model.irreps_out:
         raise ValueError("This model already has force outputs.")
     return GradientOutput(

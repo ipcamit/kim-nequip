@@ -44,7 +44,10 @@ def add_avg_num_neighbors(
         )[0]
         ann = ann.item()
         var_nn = var_nn.item()
-
+    elif(ann == "manual"):
+        ann = config.get("avg_num_neigh_val")
+        print(ann)
+        var_nn = config.get("var_num_neigh_val")
     # make sure its valid
     if ann is not None:
         ann = float(ann)

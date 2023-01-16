@@ -142,43 +142,28 @@ class InteractionBlock(GraphModuleMixin, torch.nn.Module):
                 feature_irreps_out,
             )
 
-    def forward(self, data: AtomicDataDict.Type) -> AtomicDataDict.Type:
-        """
-        Evaluate interaction Block with ResNet (self-connection).
 
-        :param node_input:
-        :param node_attr:
-        :param edge_src:
-        :param edge_dst:
-        :param edge_attr:
-        :param edge_length_embedded:
+    def forward(self, x, h, edge_length_embeddings, edge_sh, edge_index):
+        weight = self.fc(edge_length_embeddings)
 
-        :return:
-        """
-        weight = self.fc(data[AtomicDataDict.EDGE_EMBEDDING_KEY])
-
-        x = data[AtomicDataDict.NODE_FEATURES_KEY]
-        edge_src = data[AtomicDataDict.EDGE_INDEX_KEY][1]
-        edge_dst = data[AtomicDataDict.EDGE_INDEX_KEY][0]
+        # x = h
+        edge_src = edge_index[1]
+        edge_dst = edge_index[0]
 
         if self.sc is not None:
-            sc = self.sc(x, data[AtomicDataDict.NODE_ATTRS_KEY])
+            sc = self.sc(h, x)
 
-        x = self.linear_1(x)
-        edge_features = self.tp(
-            x[edge_src], data[AtomicDataDict.EDGE_ATTRS_KEY], weight
-        )
-        x = scatter(edge_features, edge_dst, dim=0, dim_size=len(x))
+        h = self.linear_1(h)
+        edge_features = self.tp(h[edge_src], edge_sh, weight)
+        h = scatter(edge_features, edge_dst, dim=0, dim_size=len(h))
 
         # Necessary to get TorchScript to be able to type infer when its not None
         avg_num_neigh: Optional[float] = self.avg_num_neighbors
         if avg_num_neigh is not None:
-            x = x.div(avg_num_neigh**0.5)
+            h = h.div(avg_num_neigh**0.5)
 
-        x = self.linear_2(x)
+        h = self.linear_2(h)
 
         if self.sc is not None:
-            x = x + sc
-
-        data[AtomicDataDict.NODE_FEATURES_KEY] = x
-        return data
+            h = h + sc
+        return h

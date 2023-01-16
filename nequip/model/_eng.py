@@ -9,6 +9,7 @@ from nequip.nn import (
     AtomwiseLinear,
     AtomwiseReduce,
     ConvNetLayer,
+    KLIFFGraphNetwork,
 )
 from nequip.nn.embedding import (
     OneHotAtomEncoding,
@@ -67,6 +68,7 @@ def SimpleIrrepsConfig(config, prefix: Optional[str] = None):
             # num_features // 2  scalars
             o3.Irreps([(max(1, num_features // 2), (0, 1))])
         )
+        print(f"In function SimpleIrrepConfig: {update}")
 
     # check update is consistant with config
     # (this is necessary since it is not possible
@@ -90,7 +92,7 @@ def EnergyModel(
 
     For minimal and full configuration option listings, see ``minimal.yaml`` and ``example.yaml``.
     """
-    logging.debug("Start building the network model")
+    print(f"Start building the network model in EnergyModel function {initialize}")
 
     builder_utils.add_avg_num_neighbors(
         config=config, initialize=initialize, dataset=dataset
@@ -133,8 +135,7 @@ def EnergyModel(
             out_field=AtomicDataDict.TOTAL_ENERGY_KEY,
         ),
     )
-
-    return SequentialGraphNetwork.from_parameters(
+    return KLIFFGraphNetwork.from_parameters(
         shared_params=config,
         layers=layers,
     )

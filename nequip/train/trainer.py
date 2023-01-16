@@ -795,11 +795,20 @@ class Trainer:
         else:
             self.model.train()
 
+        # for param_tensor in self.model.state_dict():
+        #     print(param_tensor)
+        #
+        #
+        from e3nn.util.jit import script
+        # torch.save(self.model.state_dict(), "model_si_full.pth")
+        model_tmp = script(self.model)
+        model_tmp.save("model_si_3_layer_staged.pt")
         # Do any target rescaling
         data = data.to(self.torch_device)
         data = AtomicData.to_AtomicDataDict(data)
-
         data_unscaled = data
+
+        # print(f"Trainer unscaled {data}")
         for layer in self.rescale_layers:
             # This means that self.model is RescaleOutputs
             # this will normalize the targets
@@ -814,9 +823,17 @@ class Trainer:
             for k, v in data_unscaled.items()
             if k not in self._remove_from_model_input
         }
-        out = self.model(input_data)
+        # print(f"Trainer input {input_data}")
+        x = input_data[AtomicDataDict.ATOM_TYPE_KEY]
+        pos = input_data[AtomicDataDict.POSITIONS_KEY]
+        edge_index = input_data[AtomicDataDict.EDGE_INDEX_KEY]
+        contributions = torch.zeros(64, dtype=torch.long)
+        out = self.model(x, pos, edge_index,edge_index,edge_index, contributions)
+        # out = self.model(input_data)
+        print(out)
+        exit()
+        # print(f"Trainer output {out}")
         del input_data
-
         # If we're in evaluation mode (i.e. validation), then
         # data_unscaled's target prop is unnormalized, and out's has been rescaled to be in the same units
         # If we're in training, data_unscaled's target prop has been normalized, and out's hasn't been touched, so they're both in normalized units

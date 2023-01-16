@@ -141,7 +141,7 @@ def PerSpeciesRescale(
     If ``initialize`` is false, doesn't compute statistics.
     """
     module_prefix = "per_species_rescale"
-
+    print("PerSpeciesRescale")
     # = Determine energy rescale type =
     scales = config.get(
         module_prefix + "_scales",
@@ -255,6 +255,7 @@ def PerSpeciesRescale(
     )
 
     params["arguments_in_dataset_units"] = arguments_in_dataset_units
+
     model.insert_from_parameters(
         before="total_energy_sum",
         name=module_prefix,
