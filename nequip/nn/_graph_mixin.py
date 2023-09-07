@@ -609,9 +609,10 @@ class KLIFFGraphNetwork(GraphModuleMixin, torch.nn.Sequential):
         h = self[3](h)
 
         # Conv
-        h = self[4](x_embed, h, edge_length_embeddings0, edge_sh0, edge_index0)
+        h = self[4](x_embed, h, edge_length_embeddings2, edge_sh2, edge_index2)
         h = self[5](x_embed, h, edge_length_embeddings1, edge_sh1, edge_index1)
-        h = self[6](x_embed, h, edge_length_embeddings2, edge_sh2, edge_index2)
+        h = self[6](x_embed, h, edge_length_embeddings0, edge_sh0, edge_index0)
+
 
         # Atomwise linear node feature
         h = self[7](h)
@@ -621,6 +622,7 @@ class KLIFFGraphNetwork(GraphModuleMixin, torch.nn.Sequential):
         h = self[9](x, h)
 
         # Sum to final energy
-        h = self[10](h, contributing)
+        #h = self[10](h, contributing)
+        h = h[contributing==0]
 
         return h
