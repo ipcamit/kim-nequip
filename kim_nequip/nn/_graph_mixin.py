@@ -583,7 +583,9 @@ class KLIFFGraphNetwork(GraphModuleMixin, torch.nn.Sequential):
 
     # Copied from https://pytorch.org/docs/stable/_modules/torch/nn/modules/container.html#Sequential
     # with type annotations added
-    def forward(self, species, coords, edge_index0, edge_index1, edge_index2, batch):
+    def forward(self, species, coords,
+                edge_index0, edge_index1, edge_index2, # << ADD LAYERS HERE
+                batch):
         x = species
         pos = coords
         contributing = batch
@@ -597,16 +599,26 @@ class KLIFFGraphNetwork(GraphModuleMixin, torch.nn.Sequential):
         edge_vec0, edge_sh0 = self[1](pos, edge_index0)
         edge_vec1, edge_sh1 = self[1](pos, edge_index1)
         edge_vec2, edge_sh2 = self[1](pos, edge_index2)
+        # edge_vec3, edge_sh3 = self[1](pos, edge_index3)
+        # edge_vec4, edge_sh4 = self[1](pos, edge_index4) ... << ADD LAYERS HERE
 
         # Radial basis functions
         edge_lengths0, edge_length_embeddings0 = self[2](edge_vec0)
         edge_lengths1, edge_length_embeddings1 = self[2](edge_vec1)
         edge_lengths2, edge_length_embeddings2 = self[2](edge_vec2)
+        # edge_lengths3, edge_length_embeddings3 = self[2](edge_vec3)
+        # edge_lengths4, edge_length_embeddings4 = self[2](edge_vec4) ... << ADD LAYERS HERE
+
 
         # Atomwise linear node feature
         h = self[3](h)
 
         # Conv
+        # << ADD LAYERS HERE
+        # h = self[4](x_embed, h, edge_length_embeddings4, edge_sh4, edge_index4)
+        # h = self[5](x_embed, h, edge_length_embeddings0, edge_sh5, edge_index5)
+        #        |  Edit indexes of layers accordingly (they should be in sequential order)
+        #        v
         h = self[4](x_embed, h, edge_length_embeddings2, edge_sh2, edge_index2)
         h = self[5](x_embed, h, edge_length_embeddings1, edge_sh1, edge_index1)
         h = self[6](x_embed, h, edge_length_embeddings0, edge_sh0, edge_index0)
@@ -623,7 +635,9 @@ class KLIFFGraphNetwork(GraphModuleMixin, torch.nn.Sequential):
         #h = self[10](h, contributing)
         h = h[contributing==0]
         energy = torch.sum(h)
-        forces, = torch.autograd.grad([energy], [pos], retain_graph=True, create_graph=True)
+        forces, = torch.autograd.grad([energy],
+                                      [pos],
+                                      retain_graph=True, create_graph=True)
         if forces is None:
             forces = torch.zeros_like(pos)
         return energy, -forces

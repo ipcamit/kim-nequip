@@ -183,16 +183,20 @@ def copy_weights(deployed_model, final_model, config):
             list(deployed_model.modules())[deployed_conv_indices[i]].conv.avg_num_neighbors)
 
     final_model.double()
-
     class WrappedModel(torch.nn.Module):
         def __init__(self, model):
             super().__init__()
             self.model = model
 
-        def forward(self,x,pos,edge_graph0, edge_graph1, edge_graph2, contributions):
-            energy, forces = self.model(x,pos,edge_graph0,edge_graph1,edge_graph2,contributions)
+    # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+        def forward(self, x, pos,
+                    edge_graph0, edge_graph1, edge_graph2,  # << ADD LAYERS HERE
+                    contributions):
+            energy, forces = self.model(x, pos,
+                                        edge_graph0, edge_graph1, edge_graph2, # << ADD LAYERS HERE
+                                        contributions)
             return energy, forces
-
+    # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
     model_wrapped = WrappedModel(final_model)
     model_wrapped = torch.jit.script(model_wrapped)
