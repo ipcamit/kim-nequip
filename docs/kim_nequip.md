@@ -201,3 +201,14 @@ energy = atoms.get_potential_energy()
 forces = atoms.get_forces()
 ```
 
+## GPU Support
+The model driver supports GPU inference. You just need to set `KIM_MODEL_EXECUTION_DEVICE` to `cuda`.
+For enabling multiple GPU support on same node, you need to set `KIM_MODEL_MPI_AWARE` to `yes` 
+**before installing the model driver**. Please note that even without the `KIM_MODEL_MPI_AWARE`
+environment variable, the model driver can still run on multiple GPUs, but it would only be able to use
+one GPU per node. 
+
+:::{tip}
+If your HPC uses CUDA aware MPI installation, you might not need the `KIM_MODEL_MPI_AWARE`
+environment variable. Please let us know if you get any issues.
+:::

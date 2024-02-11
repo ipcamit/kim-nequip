@@ -11,9 +11,9 @@ Most conventional GNN use convolutional layers that pass messages between atoms,
 they look like,
 ```python
 for i in range(n_conv):
-    h = graph_conv(h, edge_graph)
+    h = graph_conv(h, edge_index)
 ```
-where `h` is the atom embeddings, and `edge_graph` defines the edge connections between 
+where `h` is the atom embeddings, and `edge_index` defines the edge connections between 
 atoms. The `graph_conv` function is a convolutional layer that takes the atom embeddings
 and the edge connections, and returns the updated atom embeddings.
 Here the input of one model layer is the output of the previous layer, and this in effect 
@@ -42,14 +42,14 @@ This poses challenges in constructing the model, as the model must now use diffe
 superseding edge graphs to correctly give the multiple message passings like above.
 In essence, the convolutions must look like,
 ```python
-h = graph_conv(h, edge_graph_1) # convolve with r_cutoff * 2 sphere of atoms, r_infl
-h = graph_conv(h, edge_graph_0) # final convolution with r_cutoff sphere of atoms
+h = graph_conv(h, edge_index1) # convolve with r_cutoff * 2 sphere of atoms, r_infl
+h = graph_conv(h, edge_index0) # final convolution with r_cutoff sphere of atoms
 ```
 Please pay attention to the inverse order of convolution, where the first convolution is
 over the entire sphere of influence, and the last convolution is over the r_cutoff sphere.
-Here, `edge_graph_1` is a graph for all the atoms in the influence sphere thus first convolution
+Here, `edge_index1` is a graph for all the atoms in the influence sphere thus first convolution
 operation (gray circle, labelled Graph Conv 1, on the left in the figure below) calculates 
-feature vector for all the atoms in the cutoff distance sphere, and `edge_graph_0` is a
+feature vector for all the atoms in the cutoff distance sphere, and `edge_index0` is a
 graph for all the atoms in the cutoff distance sphere (red circle on the right in the figure below).
 
 ```{figure} _static/conv.png
@@ -106,8 +106,8 @@ graphs for the GNN model.
 $ print(graph)
 # PyGGraph(energy= ... edge_index0=[2, 1478], edge_index1=[2, 4622])
 ```
-As you can see the `edge_index_1` is the larger graph, and would convoluted first, followed
-by smalled `edge_index_0` graph.
+As you can see the `edge_index1` is the larger graph, and would convoluted first, followed
+by smalled `edge_index0` graph.
 
 :::{tip}
 The `KIMDriverGraph` is a part of `kliff` package, and depends upon Pytorch Geometric library.
@@ -117,12 +117,12 @@ For GNN support TorchML driver currently only supports the Pytorch Geometric lib
 ## GNN model signature
 As described in the [API](#signature-target) section, the GNN model must have a signature
 ```python
-def forward(self, species, coords, edge_graph0, edge_graph1, edge_graph2, contributions)
+def forward(self, species, coords, edge_index0, edge_index1, edge_index2, contributions)
 ```
 where,
 1. `species` is a vector of atomic indices (see [species](#species-target)), 
 2. `coords` is a 2D, n x 3 array of atomic coordinates
-3. `edge_graph0`, `edge_graph1`, `edge_graph2` are the staged edge graphs described above
+3. `edge_index0`, `edge_index1`, `edge_index2` are the staged edge graphs described above
 4. `contributions` is a vector of 1s and 0s, where 0 indicates the contributing atoms and 1 indicates the non-contributing atoms.
 
 :::{tip}

@@ -61,7 +61,7 @@ vector would look like,
 where, the first two atoms are of species O, and the next four are of species Si. Note that
 indexing always assign the first element as zero, i.e. if you parameter file has species as
 Si and O then Si would be assigned `0` and O would be assigned `1`, but if the parameter file
-has species as O and S` then O would be assigned `0` and Si would be assigned `1`. So 
+has species as O and S then O would be assigned `0` and Si would be assigned `1`. So 
 be careful while defining the order of species in the parameter file.
 
 :::{tip}
