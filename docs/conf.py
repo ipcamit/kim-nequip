@@ -16,11 +16,13 @@ author = 'Amit Gupta'
 extensions = ['sphinx.ext.autodoc', 'sphinx.ext.napoleon', 'sphinx.ext.viewcode', 'sphinx.ext.mathjax', 'myst_parser']
 
 myst_enable_extensions = [
-    "dollarmath",
-    "amsmath",
-    "deflist",
-    "html_admonition",
-    "html_image",
+    'deflist',
+    'html_admonition',
+    'html_image',
+    'colon_fence',
+    'smartquotes',
+    'replacements',
+    'substitution'
 ]
 
 templates_path = ['_templates']
@@ -35,4 +37,4 @@ html_static_path = ['_static']
 html_theme_options = {
     "sidebar_hide_name": True,
 }
-
+html_title = "Porting ML models to KIM-API standard"

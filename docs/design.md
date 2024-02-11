@@ -7,7 +7,7 @@ model (using Pytorch C++ API, libtorch) to calculate the energy. If the mode
 provides a tuple of two `torch.tensor` objects, the second tensor is used as forces, otherwise
 the forces are calculated using the energy tensor, and running the backward pass.
 
-The information on whether or not the model provides forces is stored as one of the
+The information on whether the model provides forces is stored as one of the
 fields in the portable model file.
 
 <img src="_static/model_driver.png" width="800">

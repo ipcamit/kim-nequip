@@ -43,11 +43,12 @@ of TorchML model you would also need the TorchScript model file. In case of the 
 the model is a "parameter" as well.
 
 :::{tip}
-Following extensions are must for all files, `.pt` for TorchScript model file, `.param` for parameter file, and `.dat` for descriptor file.
+Following extensions are must for files, `.pt` for TorchScript model file, `.param` for parameter file, and `.dat` for descriptor file.
+Arbitrary extensions are not supported.
 :::
 
 The portable model has the directory structure as follows:
-```{bash}
+```shell
 MY_MODEL_NAME__MO_000000000000_000
 ├── CMakeLists.txt
 ├── descriptor.dat
@@ -56,7 +57,7 @@ MY_MODEL_NAME__MO_000000000000_000
 ```
 
 and CMakeLists.txt file usually looks like this:
-```{cmake}
+```cmake
 cmake_minimum_required(VERSION 3.10)
 
 list(APPEND CMAKE_PREFIX_PATH $ENV{KIM_API_CMAKE_PREFIX_DIR})
