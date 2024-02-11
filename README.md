@@ -1,4 +1,5 @@
 # KIM-NequIP
+[![Documentation Status](https://readthedocs.org/projects/kim-torchml-port/badge/?version=latest)](https://kim-torchml-port.readthedocs.io/en/latest/?badge=latest)
 
 ## Introduction
 This is a highly stripped down and edited version of original NequIP repository,

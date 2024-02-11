@@ -3,7 +3,7 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to KIM-NequIP's documentation!
+Porting ML models to KIM TorchML driver
 ======================================
 
 .. toctree::
@@ -13,6 +13,9 @@ Welcome to KIM-NequIP's documentation!
    introduction.md
    design.md
    torchmlAPI.md
+   conventional.md
+   descriptor.md
+   gnn.md
 
 Indices and tables
 ==================
