@@ -1,3 +1,4 @@
+(generic-target)=
 # Generic Models
 TorchML model driver gives the option to use completely generic models, by passing the raw 
 inputs from the simulator to the model. The idea behind this model interface is to provide
@@ -45,8 +46,10 @@ class StillingerWeberLayer(nn.Module):
 
 ```
 
-The energy functions can be implemented as given at the bottom of this page. Let us go 
+The energy functions can be implemented as given in the [appendix](#sw-target). Let us go 
 through the model inputs for now,
+
+(species-target)=
 ## Species
 The species tensor is a 1D vector containing the species of the atoms in the configuration.
 Usually the species are represented as an index of values  0 to n - 1, where n is the number of 
@@ -57,8 +60,8 @@ vector would look like,
 ```
 where, the first two atoms are of species O, and the next four are of species Si. Note that
 indexing always assign the first element as zero, i.e. if you parameter file has species as
-`Si` and `O` then Si would be assigned 0 and O would be assigned 1, but if the parameter file
-has species as `O` and `Si` then O would be assigned 0 and Si would be assigned 1. So 
+Si and O then Si would be assigned `0` and O would be assigned `1`, but if the parameter file
+has species as O and S` then O would be assigned `0` and Si would be assigned `1`. So 
 be careful while defining the order of species in the parameter file.
 
 :::{tip}
@@ -97,11 +100,12 @@ num_neighbors, neighbor_list = nl.get_numneigh_and_neighlist_1D()
 where `configuration` is the `kliff.dataset.Configuration ` object. Please see KLIFF documentation 
 for more details.
 
+(contributing-target)=
 ## Contributing atoms
 The `particle_contributing` vector is a 1D vector containing the information about whether the 
 atom is contributing to the energy or not. 
 
-:::{admonition}
+:::{danger} 
 Please note that the `particle_contributing` vector is modeled as a boolean vector, i.e. 1 for
 contributing atoms and 0 for non-contributing atoms. This is opposite for GNN models, where
 1 is for non-contributing atoms and 0 is for contributing atoms. This is because in GNNs 
@@ -109,64 +113,3 @@ the contribution/non-contribution is derived to benefit the "batching" in ML mod
 (i.e. all contributing atoms batch to 0, non-contributing batch to 1).
 :::
 
-***
-### Pytorch implementation of Stillinger-Weber energy functions
-
-```python
-def calc_sw2(A, B, p, q, sigma, cutoff, rij):
-    if rij < cutoff:
-        sig_r = sigma / rij
-        E2 = A * (B * sig_r ** p - sig_r ** q) * torch.exp(sigma / (rij - cutoff))
-    else:
-        E2 = torch.tensor(0.0, dtype=torch.float32)
-    return E2
-
-def calc_sw3(
-    lam, cos_beta0, gamma_ij, gamma_ik, cutoff_ij, cutoff_ik, cutoff_jk, rij, rik, rjk
-):
-    cos_beta_ikj = (rij ** 2 + rik ** 2 - rjk ** 2) / (2 * rij * rik)
-    cos_diff = cos_beta_ikj - cos_beta0
-    exp_ij_ik = torch.exp(gamma_ij / (rij - cutoff_ij) + gamma_ik / (rik - cutoff_ik))
-    E3 = lam * exp_ij_ik * cos_diff ** 2
-    return E3
-
-def energy(particle_contributing: torch.Tensor, coords: torch.Tensor,
-    num_neighbors: torch.Tensor, neighbor_list: torch.Tensor, A: torch.Tensor,
-    B: torch.Tensor, p: torch.Tensor, q: torch.Tensor, sigma: torch.Tensor,
-    gamma: torch.Tensor, cutoff: torch.Tensor, lam: torch.Tensor, cos_beta0: torch.Tensor,
-):
-    energy_conf = torch.tensor(0.0, dtype=torch.float32)
-
-    neigh_list_cursor = 0
-    num_atoms = particle_contributing.shape[0]
-    for atom_i in range(num_atoms):
-        if particle_contributing[atom_i] != 1:
-            continue
-
-        # Coordinates of atom i
-        xyz_i = coords[0, atom_i * 3 : (atom_i + 1) * 3]
-        num_neigh_i = int(num_neighbors[atom_i])
-
-        neigh_i_begin = neigh_list_cursor
-        neigh_i_end = neigh_i_begin + num_neigh_i
-        nli = neighbor_list[0, torch.arange(neigh_i_begin, neigh_i_end)]
-        neigh_list_cursor = neigh_i_end
-
-        for atom_j in range(num_neigh_i):
-            xyz_j = coords[0, (nli[atom_j]) * 3 : ((nli[atom_j]) + 1) * 3]
-            rij = xyz_j - xyz_i
-            norm_rij = (rij[0] ** 2 + rij[1] ** 2 + rij[2] ** 2) ** 0.5
-            E2 = calc_sw2(A, B, p, q, sigma, cutoff, norm_rij)
-            energy_conf = energy_conf + 0.5 * E2
-            for atom_k in range(atom_j + 1, num_neigh_i):
-                xyz_k = coords[0, (nli[atom_k]) * 3 : ((nli[atom_k]) + 1) * 3]
-                rik = xyz_k - xyz_i
-                norm_rik = (rik[0] ** 2 + rik[1] ** 2 + rik[2] ** 2) ** 0.5
-                rjk = xyz_k - xyz_j
-                norm_rjk = (rjk[0] ** 2 + rjk[1] ** 2 + rjk[2] ** 2) ** 0.5
-                E3 = calc_sw3( lam, cos_beta0, gamma, gamma, cutoff, cutoff, cutoff, 
-                               norm_rij, norm_rik, norm_rjk)
-                energy_conf = energy_conf + E3
-    return energy_conf
-
-```

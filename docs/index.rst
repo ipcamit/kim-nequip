@@ -13,9 +13,11 @@ Porting ML models to KIM TorchML driver
    introduction.md
    design.md
    torchmlAPI.md
-   conventional.md
+   generic.md
    descriptor.md
    gnn.md
+   kim_nequip.md
+   appendix.md
 
 Indices and tables
 ==================

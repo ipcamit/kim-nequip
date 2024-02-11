@@ -6,6 +6,7 @@ As TorchML model driver uses the CXX API of libtorch, it can run every model in 
 But for interference with KIM API, the model need to accept inputs in a certain format and 
 return the energy and forces, or just the energy.
 
+(signature-target)=
 ## Required Signatures
 To make any model compatible with TorchML model driver, you just need to ensure two things
 1. The model's `forward` function should accept the inputs in the format given below
@@ -75,7 +76,7 @@ add_kim_api_model_library(
 ```
 `MyTorchScriptFile.pt` is the TorchScript model file, and `file.param` is the parameter file.
 
-The parameter file contains the information about the model, in following format,
+The parameter file contains the information about the model, in following format
 ```
 # Num of elements: how many species the model supports and what are they
 2
@@ -108,3 +109,6 @@ True
 None
 ```
 
+:::{warning}
+Please note that the blank lines in above file are important and part of the specification.
+:::
