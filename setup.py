@@ -11,14 +11,14 @@ del version_dict
 setup(
     name="kim_nequip",
     version=version,
-    description="NequIP is an open-source code for building E(3)-equivariant interatomic potentials.",
+    description="Stripped down version of nequip 0.5.3 for KIM",
     author="Amit Gupta",
     python_requires=">=3.7",
     packages=find_packages(include=["kim_nequip", "kim_nequip.*"]),
     entry_points={
         # make the scripts available as command line scripts
         "console_scripts": [
-            "nequip-port-kim = kim_nequip.scripts.convert:main",
+            "kim-nequip-port = kim_nequip.scripts.convert:main",
         ]
     },
     install_requires=[

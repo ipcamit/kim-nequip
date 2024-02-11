@@ -586,7 +586,7 @@ class KLIFFGraphNetwork(GraphModuleMixin, torch.nn.Sequential):
     def forward(self, species, coords,
                 edge_index0, edge_index1, edge_index2, # << ADD LAYERS HERE
                 batch):
-        x = species
+        x = species # assignments to match the original code
         pos = coords
         contributing = batch
 
@@ -634,10 +634,6 @@ class KLIFFGraphNetwork(GraphModuleMixin, torch.nn.Sequential):
         # Sum to final energy
         #h = self[10](h, contributing)
         h = h[contributing==0]
-        energy = torch.sum(h)
-        forces, = torch.autograd.grad([energy],
-                                      [pos],
-                                      retain_graph=True, create_graph=True)
-        if forces is None:
-            forces = torch.zeros_like(pos)
-        return energy, -forces
+        energy = torch.sum(h) # yet to scale the energy
+        # if you need per particle energy, then do not sum here
+        return energy

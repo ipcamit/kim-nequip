@@ -158,7 +158,7 @@ def copy_weights(deployed_model, final_model, config):
     for module in list(final_model.modules()):
         try:
             idx = module.conv.avg_num_neighbors
-            if configs["verbose-conv"]:
+            if config["verbose-conv"]:
                 print(f"New model conv layer #: {idx}")
             final_conv_indices.append(i)
         except:
@@ -170,7 +170,7 @@ def copy_weights(deployed_model, final_model, config):
     for module in list(deployed_model.modules()):
         try:
             idx = module.conv.avg_num_neighbors
-            if configs["verbose-conv"]:
+            if config["verbose-conv"]:
                 print(f"Deployed model conv layer #: {idx}")
             deployed_conv_indices.append(i)
         except:
@@ -183,24 +183,30 @@ def copy_weights(deployed_model, final_model, config):
             list(deployed_model.modules())[deployed_conv_indices[i]].conv.avg_num_neighbors)
 
     final_model.double()
+
     class WrappedModel(torch.nn.Module):
-        def __init__(self, model):
+        def __init__(self, model, scale_by):
             super().__init__()
             self.model = model
-
+            self.register_buffer("scale_by", scale_by)
     # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         def forward(self, x, pos,
                     edge_graph0, edge_graph1, edge_graph2,  # << ADD LAYERS HERE
                     contributions):
-            energy, forces = self.model(x, pos,
-                                        edge_graph0, edge_graph1, edge_graph2, # << ADD LAYERS HERE
-                                        contributions)
-            return energy, forces
+            energy= self.model(x, pos,
+                               edge_graph0, edge_graph1, edge_graph2, # << ADD LAYERS HERE
+                               contributions)
+            energy = energy * self.scale_by # scale total energy, shift is ususally 0
+            forces, = torch.autograd.grad([energy],[pos]) # no need to preserve or create force graph, as this is for inference
+            if forces is None:
+                forces = torch.zeros_like(pos)
+            return energy, -forces
     # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-    model_wrapped = WrappedModel(final_model)
+    model_wrapped = WrappedModel(final_model, deployed_model.scale_by)
     model_wrapped = torch.jit.script(model_wrapped)
     return model_wrapped
+
 
 def save_kim_model(model, config):
     n_layers = config["num_layers"]
@@ -239,7 +245,6 @@ def save_kim_model(model, config):
         f.write("  DRIVER_NAME     \"TorchML__MD_173118614730_000\"\n")
         f.write("  PARAMETER_FILES \"file.param\"\n")
         f.write(f"                  \"{model_name}\")\n")
-
 
 
 if __name__ == "__main__":
