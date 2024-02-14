@@ -1,6 +1,6 @@
 # Graph Neural Networks
 
-Converting a GNN ot TorchML format is most involved and presents several complications.
+Converting a GNN to TorchML format is most involved and presents several complications.
 The biggest of them all the message passing in a periodic system. It is complicated
 for two reasons, first the cyclic graph convolutions and second the periodic boundary
 conditions.
@@ -66,7 +66,7 @@ Staged graph convolutions.
 
 :::{tip}
 Please note the image of red central atom on the left gray circle, which indicates that
-red atom is within the cutoff distance of the whait atom, hence for first convolution
+red atom is within the cutoff distance of the white atom, hence for first convolution
 it contributes to the feature of white atom. In second convolution this summed up feature
 contributes to the feature of the red atom. Thus giving equivalent representation as the
 cyclic graph convolutions.
@@ -134,14 +134,14 @@ For GNN support TorchML driver currently only supports the Pytorch Geometric lib
 As described in the [API](#signature-target) section, the GNN model must have a signature
 
 ```python
-def forward(self, species, coords, edge_index0, edge_index1, edge_index2, contributions)
+def forward(self, species, coords, edge_index0, edge_index1, edge_index2, ..., contributions)
 ```
 
 where,
 
 1. `species` is a vector of atomic indices (see [species](#species-target)),
 2. `coords` is a 2D, n x 3 array of atomic coordinates
-3. `edge_index0`, `edge_index1`, `edge_index2` are the staged edge graphs described above
+3. `edge_index0`, `edge_index1`, `edge_index2`... are the staged edge graphs described above
 4. `contributions` is a vector of 1s and 0s, where 0 indicates the contributing atoms and 1 indicates the non-contributing atoms.
 
 :::{tip}

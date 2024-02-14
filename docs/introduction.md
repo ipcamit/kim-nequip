@@ -1,6 +1,6 @@
 # TorchML Model Driver for KIM API
 
-With the new [TorchMl model driver](https://openkim.org/id/MD_173118614730_000) ML models are
+With the new [TorchML model driver](https://openkim.org/id/MD_173118614730_000) ML models are
 at parity with conventional models in OpenKIM model repository. The model driver brings
 the same ease of installation and use of ML models that conventional models enjoy. T
 For example the NequIP Si model ` TorchML_NequIP_GuptaTadmorMartiniani_2024_Si__MO_196181738937_000`
@@ -25,35 +25,39 @@ You can install the required environment using the script provided in the model 
 
 Optional environment variables for customizing the installation are,
 
-| Variable                  | Description                                                                                                                                                                                                                                                                                                         |
-| :------------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `KIM_MODEL_MPI_AWARE`     | if it is set to `yes`, then the model driver would need MPI library at installation time, and it would install model driver with capabilities to assign multiple GPUs as per the MPI rank of the running process. In short each rank gets the `GPU# = num_gpu%rank_id` (Please see README on the model driver page) |
-| `KIM_MODEL_DISABLE_GRAPH` | If set to `yes` it would compile the model driver wihtout requiring libtorchscatter and libtorchsparse libraries. This means that the model driver will not support the GNN                                                                                                                                         |
+| Variable                  | Description                                                                                                                                                                                                                                                                                                          |
+| :------------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `KIM_MODEL_MPI_AWARE`     | If it is set to `yes`, then the model driver would need MPI library at installation time, and it would install model driver with capabilities to assign multiple GPUs as per the MPI rank of the running process. In short each rank gets the `GPU# = num_gpu%rank_id` (Please see README on the model driver page). |
+| `KIM_MODEL_DISABLE_GRAPH` | If set to `yes` it would compile the model driver wihtout requiring libtorchscatter and libtorchsparse libraries. This means that the model driver will not support the GNN.                                                                                                                                         |
 
 ## Model locality and the need to port
 
 ### TorchScript
 
-Pytorch provides a dynamic and easy to use interface for Ml models.
+Pytorch provides a dynamic and easy to use interface for ML models.
 However, this comes at the cost of reproducibility as the model can have dynamic branching and global states that influence its output.
-Therefor, to ensure reproducibility, the model has to be converted to a static graph, which is then used for inference.
+Therefore, to ensure reproducibility, the model has to be converted to a static graph, which is then used for inference.
 This is done using the `torch.jit.script` module, which converts the model to a TorchScript model.
 TorchScript is a serialized intermediate representation of a Pytorch model, which can be used directly in the C++ API of Pytorch (libtorch).
 
 ```python
 import torch
 import torch.nn as nn
+
 class MyModel(nn.Module):
     def __init__(self):
         super(MyModel, self).__init__()
         self.fc1 = nn.Linear(10, 5)
         self.fc2 = nn.Linear(5, 1)
+
     def forward(self, x):
         x = torch.relu(self.fc1(x))
         x = self.fc2(x)
         return x
+
 model = MyModel()
 scripted_model = torch.jit.script(model)
+
 # save model to file
 scripted_model.save("model.pt")
 print(scripted_model)
@@ -118,5 +122,5 @@ poses a restriction.
 For graph neural networks, we present a novel solution to the problem by using
 "staged graph convolution" (explained more in GNN section), which not only make the GNNs local, but also makes them
 embarrassingly parallel. We provide `kim_nequip` library to convert NequIP models to
-KIM API compatible models, for other popular structures, like MACE, similar tools will
+KIM API compatible models. For other popular structures, like MACE, similar tools will
 be released soon.

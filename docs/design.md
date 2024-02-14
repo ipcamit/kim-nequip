@@ -31,7 +31,7 @@ The model driver uses the [`libdescriptor`](https://github.com/openkim/libdescri
 That is in the computation step shown below,
 
 ```{math}
-\mathbf{F} = \frac{dE}{d\mathbf{r}} = \frac{dE}{d\mathbf{d}} \frac{d\mathbf{d}}{d\mathbf{r}}
+\mathbf{F} = -\frac{dE}{d\mathbf{r}} = -\frac{dE}{d\mathbf{d}} \frac{d\mathbf{d}}{d\mathbf{r}}
 ```
 
 the {math}`\frac{d\mathbf{d}}{d\mathbf{r}}` is calculated using the `libdescriptor` library,
@@ -41,7 +41,7 @@ and forces are computed using the chain rule.
 
 The computation is done in the following steps,
 
-1. The model driver reads the input from the simulator, and converts it to the required format.
+1. The model driver reads the input from the simulator, and converts it to the required format
 2. The model driver then calls the Torch model to calculate the energy
 3. compute the gradients of the energy with respect to the input
 4. if the input is the descriptor, then calculate the gradients with respect to the positions using libdescriptor

@@ -1,4 +1,4 @@
-(generic-target)=
+    (generic-target)=
 
 # Generic Models
 
@@ -49,8 +49,7 @@ class StillingerWeberLayer(nn.Module):
 
 ```
 
-The energy functions can be implemented as given in the [appendix](#sw-target). Let us go
-through the model inputs for now,
+The energy functions can be implemented as given in the [appendix](#sw-target). Let us go through the model inputs for now,
 
 (species-target)=
 
@@ -121,6 +120,8 @@ for more details.
 
 The `particle_contributing` vector is a 1D vector containing the information about whether the
 atom is contributing to the energy or not.
+For example, for the above system with two contributing atoms, the `particle_contributing` would be
+a vector [1, 1, 0, 0] of size 4, where the first two atoms are contributing and the next two atoms non-contributing.
 
 :::{danger}
 Please note that the `particle_contributing` vector is modeled as a boolean vector, i.e. 1 for
