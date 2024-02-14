@@ -1,11 +1,13 @@
 # Descriptor Models
+
 Descriptor based models are inherently local, and hence one of the easiest to port.
-Most descriptor models can be used out of the box without any modifications. 
-The only requirement is to convert the model to TorchScript using `torch.jit.script` module. 
+Most descriptor models can be used out of the box without any modifications.
+The only requirement is to convert the model to TorchScript using `torch.jit.script` module.
 You would need to provide the parameter file, and the descriptor file to the model driver.
 The model driver will take care of the rest.
 
 The KIM model directory structure for a descriptor based model would look like this:
+
 ```shell
 MY_MODEL_NAME__MO_000000000000_000
 ├── CMakeLists.txt
@@ -13,6 +15,7 @@ MY_MODEL_NAME__MO_000000000000_000
 ├── file.param
 └── MyTorchScriptFile.pt
 ```
+
 `MyTorchScriptFile.pt` is the TorchScript model file, and `file.param` is the parameter file.
 The descriptor hyperparameters are stored in the `descriptor.dat` file.
 
@@ -21,13 +24,14 @@ Following extensions are must for files, `.pt` for TorchScript model file, `.par
 :::
 
 ## Limitations
-Biggest limitation of the descriptor models is the descriptor computation. 
-TorchML model driver utilizes the [`libdescriptor`](https://libdescriptor.readthedocs.io/en/latest/) library to calculate the forces from 
+
+Biggest limitation of the descriptor models is the descriptor computation.
+TorchML model driver utilizes the [`libdescriptor`](https://libdescriptor.readthedocs.io/en/latest/) library to calculate the forces from
 the gradients of the energy with respect to the descriptors. Hence, you are required to
-use libdescriptor for computing the descriptors. 
+use libdescriptor for computing the descriptors.
 
 This means any descriptor that is not supported by libdescriptor is not supported by the model driver.
-So if you have some custom descriptor, you would need to contact us so that we can include 
+So if you have some custom descriptor, you would need to contact us so that we can include
 your descriptor in the libdescriptor library.
 
 :::{important}

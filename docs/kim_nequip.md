@@ -1,26 +1,33 @@
 (nequip-port-target)=
+
 # KIM-NequIP-port tool
+
 ## Introduction
+
 This is a highly stripped down and edited version of original NequIP repository,
-that can be used to port your existing NequIP models to KIM API. It was created against 
-**NequIP 0.5.6**, and for later version it does seem to work, but not tested extensively. If 
+that can be used to port your existing NequIP models to KIM API. It was created against
+**NequIP 0.5.6**, and for later version it does seem to work, but not tested extensively. If
 you face any problem, please open an issue, or contact me directly.
 
-> This is a placeholder solution before the KLIFF model builder is finished which should 
-provide direct means of constructing/training compatible NequIP models.
+> This is a placeholder solution before the KLIFF model builder is finished which should
+> provide direct means of constructing/training compatible NequIP models.
 
 ## Caveats
-This works perfectly for **three convolution layers**. If you have more or less than three layers, 
+
+This works perfectly for **three convolution layers**. If you have more or less than three layers,
 you need to modify the code accordingly. You need to edit the source files at two places:
+
 1. `kim_nequip/scripts/convert.py`
 2. `kim_nequip/nn/_graph_mixin.py`
 
 ### 1. `kim_nequip/scripts/convert.py`
-This file contains the function to copy weights from the trained models to the new KIM 
+
+This file contains the function to copy weights from the trained models to the new KIM
 compatible untrained models, and save them. You need to modify the wrapper model to
-include different number layers then 3. 
+include different number layers then 3.
 
 You would need to modify the following lines 194, 197:
+
 ```python
     # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         def forward(self, x, pos,
@@ -32,7 +39,9 @@ You would need to modify the following lines 194, 197:
         # ...
     # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 ```
+
 to include the layers you have in your model,
+
 ```python
     # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         def forward(self, x, pos,
@@ -46,6 +55,7 @@ to include the layers you have in your model,
 ```
 
 ### 2. `kim_nequip/nn/_graph_mixin.py`
+
 Similarly, you need to modify the `_graph_mixin.py` file to include the layers you have in your model.
 However, this process would be a bit more involved, as you need to modify the `forward` function to include
 the layers you have in your model, and edit the list indexes accordingly. You also need to
@@ -94,7 +104,7 @@ As an example, if your model has 5 convolution layers, modify the `forward` func
         h = self[8](x_embed, h, edge_length_embeddings0, edge_sh0, edge_index0)
         #        ^  Edit indexes of layers accordingly (they should be in sequential order)
         #           and please note the reverse order of embeddings and edge vectors etc.
-    
+
         # Atomwise linear node feature
         h = self[9](h)
         h = self[10](h)
@@ -107,9 +117,11 @@ As an example, if your model has 5 convolution layers, modify the `forward` func
         energy = torch.sum(h)
         return energy
 ```
+
 Such explicit modification is required to enable the parallel inference of the model.
 
 ## Installation
+
 As the source would require considerable modification, it is recommended to install the package
 in the editable mode. To install the package in the editable mode, run the following command in the
 root directory of the package.
@@ -119,9 +131,11 @@ pip install -e .
 ```
 
 ## Usage
-The install command above should have installed the `kim-nequip-port` command line tool. 
-You can use this to convert existing *deployed NequIP models* to KIM API compatible models.
-You would need two files for this, 
+
+The install command above should have installed the `kim-nequip-port` command line tool.
+You can use this to convert existing _deployed NequIP models_ to KIM API compatible models.
+You would need two files for this,
+
 1. The deployed NequIP model, usually called `deployed.pth`
 2. The NequIP configuration yaml file, usually called `config.yaml`
 
@@ -132,33 +146,40 @@ kim-nequip-port config.yaml --deployed deployed.pth --out_name MY_MODEL_NAME.pt 
 ```
 
 This will create a following files and folders in you run dir,
+
 1. `MY_MODEL_NAME.pt` - The KIM API compatible model
 2. `MY_MODEL_NAM.txt` - The model architecture information, for checking and debugging.
 3. `MY_MODEL_NAME__MO_000000000000_000` - A folder containing KIM API compatible model files.
 
 `MY_MODEL_NAME__MO_000000000000_000` is the folder that you would need to use in your KIM API
 model. It should have the following files,
+
 1. `CMakelists.txt` - The CMake file for building the model
 2. `file.param` - The parameter file for the KIM API model, needed by the model driver
 3. `MY_MODEL_NAME.pt` - The KIM API compatible TorchScript model
 
 You can install this model directly ny the commnad,
+
 ```bash
 kim-api-collections-management install user MY_MODEL_NAME__MO_000000000000_000
 ```
-This would also install the model driver `TorchML__MD_173118614730_000` needed to run 
+
+This would also install the model driver `TorchML__MD_173118614730_000` needed to run
 the model. Please check its KIM API for more (details)[https://openkim.org/id/MD_173118614730_000].
 The following dependencies have to be met to install the model driver,
+
 1. KIM API
 2. libtorch CXX API (v1.13)
 3. libtorchscatter and libtorchsparse (not the python packages, but the CXX API)
 
 `libtorchscatter` and `libtorchsparse` CXX API can be installed from the following repositories,
+
 1. [libtorchscatter](https://github.com/rusty1s/pytorch_scatter)
 2. [libtorchsparse](https://github.com/rusty1s/pytorch_sparse)
 
 ## Inference
-If the installation is successful, you can use the model driver to run the model. Below is an 
+
+If the installation is successful, you can use the model driver to run the model. Below is an
 example LAMMPS input script to run the model.
 
 ```
@@ -181,7 +202,9 @@ timestep 0.001
 thermo 1
 run    10
 ```
+
 For ASE based evaluations, you can use the following code to run the model,
+
 ```python
 import ase
 from ase.io import read
@@ -202,11 +225,12 @@ forces = atoms.get_forces()
 ```
 
 ## GPU Support
+
 The model driver supports GPU inference. You just need to set `KIM_MODEL_EXECUTION_DEVICE` to `cuda`.
-For enabling multiple GPU support on same node, you need to set `KIM_MODEL_MPI_AWARE` to `yes` 
+For enabling multiple GPU support on same node, you need to set `KIM_MODEL_MPI_AWARE` to `yes`
 **before installing the model driver**. Please note that even without the `KIM_MODEL_MPI_AWARE`
 environment variable, the model driver can still run on multiple GPUs, but it would only be able to use
-one GPU per node. 
+one GPU per node.
 
 :::{tip}
 If your HPC uses CUDA aware MPI installation, you might not need the `KIM_MODEL_MPI_AWARE`
