@@ -1,7 +1,9 @@
 # Appendix
 
 (appendix-torchscript-target)=
+
 ## A1: Using layers from a TorchScript model
+
 ```python
 import torch
 import torch.nn as nn
@@ -44,7 +46,8 @@ print(scripted_wrapped_model(x))
 ```
 
 (sw-target)=
-## A2:  Pytorch implementation of Stillinger-Weber energy functions
+
+## A2: Pytorch implementation of Stillinger-Weber energy functions
 
 ```python
 def calc_sw2(A, B, p, q, sigma, cutoff, rij):
@@ -98,7 +101,7 @@ def energy(particle_contributing: torch.Tensor, coords: torch.Tensor,
                 norm_rik = (rik[0] ** 2 + rik[1] ** 2 + rik[2] ** 2) ** 0.5
                 rjk = xyz_k - xyz_j
                 norm_rjk = (rjk[0] ** 2 + rjk[1] ** 2 + rjk[2] ** 2) ** 0.5
-                E3 = calc_sw3( lam, cos_beta0, gamma, gamma, cutoff, cutoff, cutoff, 
+                E3 = calc_sw3( lam, cos_beta0, gamma, gamma, cutoff, cutoff, cutoff,
                                norm_rij, norm_rik, norm_rjk)
                 energy_conf = energy_conf + E3
     return energy_conf
@@ -106,7 +109,9 @@ def energy(particle_contributing: torch.Tensor, coords: torch.Tensor,
 ```
 
 (example-descriptor)=
+
 ## A3: Example `descriptor.dat` file
+
 TorchML model driver descriptor file for Behler Symmetry funcitons (KLIFF set 51).
 
 ```text
@@ -190,10 +195,10 @@ center_and_normalize  False
 
 51   # descriptor size
 # mean
-0.0 
+0.0
 
 # standard deviation
-1.0 
+1.0
 ```
 
 :::{caution}
