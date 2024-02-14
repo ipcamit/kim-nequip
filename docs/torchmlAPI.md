@@ -30,8 +30,8 @@ The models are named as follows:
 | Models                          | Folder in `colabfit-portable-models`                                                              |
 | :------------------------------ | :------------------------------------------------------------------------------------------------ |
 | Generic, all encompassing model | `TorchMLModel1_SW`, a Stillinger-Weber model implemented in pytorch to highlight the flexibility. |
-| Descriptor based models         | `TorchMLModel2_Desc`, is a simple Symmetry functions based neural network                         |
-| Graph neural networks           | `TorchMLModel3_Graph`, implements a generic 3 layer, GNN                                          |
+| Descriptor based models         | `TorchMLModel2_Desc`, is a simple symmetry functions based neural network                         |
+| Graph neural networks           | `TorchMLModel3_Graph`, implements a generic 3-layer GNN                                           |
 
 ## Basic porting steps
 
