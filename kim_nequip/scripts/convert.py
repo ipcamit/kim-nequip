@@ -203,7 +203,12 @@ def copy_weights(deployed_model, final_model, config):
             return energy, -forces
     # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-    model_wrapped = WrappedModel(final_model, deployed_model.scale_by)
+    try:
+        scale_by = deployed_model.scale_by
+    except:
+        scale_by = torch.tensor(1.0)
+
+    model_wrapped = WrappedModel(final_model, scale_by)
     model_wrapped = torch.jit.script(model_wrapped)
     return model_wrapped
 
