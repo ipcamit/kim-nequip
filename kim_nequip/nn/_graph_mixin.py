@@ -584,7 +584,7 @@ class KLIFFGraphNetwork(GraphModuleMixin, torch.nn.Sequential):
     # Copied from https://pytorch.org/docs/stable/_modules/torch/nn/modules/container.html#Sequential
     # with type annotations added
     def forward(self, species, coords,
-                edge_index0, edge_index1, edge_index2, # << ADD LAYERS HERE
+                edge_index0, edge_index1, edge_index2,edge_index3, # << ADD LAYERS HERE
                 batch):
         x = species # assignments to match the original code
         pos = coords
@@ -599,14 +599,14 @@ class KLIFFGraphNetwork(GraphModuleMixin, torch.nn.Sequential):
         edge_vec0, edge_sh0 = self[1](pos, edge_index0)
         edge_vec1, edge_sh1 = self[1](pos, edge_index1)
         edge_vec2, edge_sh2 = self[1](pos, edge_index2)
-        # edge_vec3, edge_sh3 = self[1](pos, edge_index3)
+        edge_vec3, edge_sh3 = self[1](pos, edge_index3)
         # edge_vec4, edge_sh4 = self[1](pos, edge_index4) ... << ADD LAYERS HERE
 
         # Radial basis functions
         edge_lengths0, edge_length_embeddings0 = self[2](edge_vec0)
         edge_lengths1, edge_length_embeddings1 = self[2](edge_vec1)
         edge_lengths2, edge_length_embeddings2 = self[2](edge_vec2)
-        # edge_lengths3, edge_length_embeddings3 = self[2](edge_vec3)
+        edge_lengths3, edge_length_embeddings3 = self[2](edge_vec3)
         # edge_lengths4, edge_length_embeddings4 = self[2](edge_vec4) ... << ADD LAYERS HERE
 
 
@@ -619,17 +619,18 @@ class KLIFFGraphNetwork(GraphModuleMixin, torch.nn.Sequential):
         # h = self[5](x_embed, h, edge_length_embeddings0, edge_sh5, edge_index5)
         #        |  Edit indexes of layers accordingly (they should be in sequential order)
         #        v
-        h = self[4](x_embed, h, edge_length_embeddings2, edge_sh2, edge_index2)
-        h = self[5](x_embed, h, edge_length_embeddings1, edge_sh1, edge_index1)
-        h = self[6](x_embed, h, edge_length_embeddings0, edge_sh0, edge_index0)
+        h = self[4](x_embed, h, edge_length_embeddings3, edge_sh3, edge_index2)
+        h = self[5](x_embed, h, edge_length_embeddings2, edge_sh2, edge_index2)
+        h = self[6](x_embed, h, edge_length_embeddings1, edge_sh1, edge_index1)
+        h = self[7](x_embed, h, edge_length_embeddings0, edge_sh0, edge_index0)
 
 
         # Atomwise linear node feature
-        h = self[7](h)
         h = self[8](h)
+        h = self[9](h)
 
         # Shift and scale
-        h = self[9](x, h)
+        h = self[10](x, h)
 
         # Sum to final energy
         #h = self[10](h, contributing)

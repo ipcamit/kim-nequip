@@ -57,6 +57,11 @@ def model_from_config(
         for b in config.get("model_builders", [])
     ]
 
+    # remove ForceOutput and RescaleEnergyEtc
+    for b in builders:
+        if b.__name__ == "ForceOutput" or b.__name__ == "RescaleEnergyEtc":
+            builders.remove(b)
+
     model = None
 
     for builder in builders:

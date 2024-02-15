@@ -191,10 +191,10 @@ def copy_weights(deployed_model, final_model, config):
             self.register_buffer("scale_by", scale_by)
     # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         def forward(self, x, pos,
-                    edge_graph0, edge_graph1, edge_graph2,  # << ADD LAYERS HERE
+                    edge_graph0, edge_graph1, edge_graph2,edge_graph3,  # << ADD LAYERS HERE
                     contributions):
             energy= self.model(x, pos,
-                               edge_graph0, edge_graph1, edge_graph2, # << ADD LAYERS HERE
+                               edge_graph0, edge_graph1, edge_graph2,edge_graph3, # << ADD LAYERS HERE
                                contributions)
             energy = energy * self.scale_by # scale total energy, shift is ususally 0
             forces, = torch.autograd.grad([energy],[pos]) # no need to preserve or create force graph, as this is for inference
